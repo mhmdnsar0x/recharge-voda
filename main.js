@@ -363,8 +363,4 @@ form.addEventListener('submit', async function (e) {
   }
 });
 
-newRequestBtn.addEventListener("click", function () {
-  window.location.href = "/";
-});
-
 
