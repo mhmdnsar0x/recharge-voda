@@ -1,4 +1,3 @@
-// Balance mapping data
 const balanceMapping = {
   "20": 25,
   "30": 38,
@@ -104,28 +103,23 @@ function formatCurrency(amount) {
 
 async function sendToTelegram(orderData) {
   try {
-    const message = formatTelegramMessage(orderData);
-    const textResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: 'HTML'
-      })
-    });
-
-    if (!textResponse.ok) {
-      const errorText = await textResponse.text();
-      throw new Error('Telegram API Error: ' + errorText);
-    }
-
     if (orderData.screenshot) {
-      await sendScreenshotToTelegram(orderData.screenshot);
+      const caption = formatTelegramMessage(orderData);
+      await sendScreenshotWithCaption(orderData.screenshot, caption);
+    } else {
+      const message = formatTelegramMessage(orderData);
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: message,
+          parse_mode: 'HTML'
+        })
+      });
     }
-
     return true;
   } catch (error) {
     console.error('Error sending to Telegram:', error);
@@ -133,12 +127,13 @@ async function sendToTelegram(orderData) {
   }
 }
 
-async function sendScreenshotToTelegram(screenshot) {
+async function sendScreenshotWithCaption(screenshot, caption) {
   try {
     const formData = new FormData();
     formData.append('chat_id', TELEGRAM_CHAT_ID);
     formData.append('photo', screenshot, 'payment_screenshot.jpg');
-    formData.append('caption', 'لقطة شاشة الدفع / Payment Screenshot');
+    formData.append('caption', caption);
+    formData.append('parse_mode', 'HTML');
 
     const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
       method: 'POST',
