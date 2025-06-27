@@ -89,58 +89,22 @@ function formatCurrency(amount) {
 
 // Telegram Bot Functions
 async function sendToTelegram(orderData) {
-  try {
-    // First, send the text message with order details
-    const message = formatTelegramMessage(orderData);
-    const textResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: 'HTML'
-      })
-    });
+  // orderData.screenshot: File object (the image)
+  // formatTelegramMessage(orderData): returns the message string
 
-    if (!textResponse.ok) {
-      throw new Error('Failed to send message to Telegram');
-    }
+  const formData = new FormData();
+  formData.append('chat_id', TELEGRAM_CHAT_ID);
+  formData.append('photo', orderData.screenshot, 'payment_screenshot.jpg');
+  formData.append('caption', formatTelegramMessage(orderData));
+  formData.append('parse_mode', 'HTML');
 
-    // Then, send the screenshot if available
-    if (orderData.screenshot) {
-      await sendScreenshotToTelegram(orderData.screenshot);
-    }
+  const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+    method: 'POST',
+    body: formData
+  });
 
-    return true;
-  } catch (error) {
-    console.error('Error sending to Telegram:', error);
-    throw error;
-  }
-}
-
-async function sendScreenshotToTelegram(screenshot) {
-  try {
-    const formData = new FormData();
-    formData.append('chat_id', TELEGRAM_CHAT_ID);
-    formData.append('photo', screenshot, 'payment_screenshot.jpg');
-    formData.append('caption', 'لقطة شاشة الدفع / Payment Screenshot');
-
-    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to send screenshot to Telegram');
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error sending screenshot to Telegram:', error);
-    throw error;
-  }
+  if (!response.ok) throw new Error('Failed to send to Telegram');
+  return true;
 }
 
 function formatTelegramMessage(orderData) {
@@ -153,8 +117,8 @@ function formatTelegramMessage(orderData) {
     minute: '2-digit'
   });
 
-  const paymentMethodText = orderData.paymentMethod === 'cash' ? 'محفظة كاش' : 'انستا باي';
-  const senderLabel = orderData.paymentMethod === 'cash' ? 'رقم المرسل' : 'اسم المستخدم';
+  const paymentMethodText = orderData.paymentMethod === 'cash' ? 'Cash Wallet ' : 'InstaPay';
+  const senderLabel = orderData.paymentMethod === 'cash' ? 'Cash Number ' : 'Insta User ';
 
   return `
 🔔 <b>New Order </b>
@@ -492,3 +456,4 @@ document.querySelectorAll('.offer-box .offer-cancel').forEach(btn => {
     if (typeof validateForm === 'function') validateForm();
   });
 });
+
