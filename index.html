@@ -39,35 +39,51 @@
         <img src="assets/voda.png" class="title"  alt="Logo" style="max-width: 150px; margin-top:1.5rem">
       </div>
       <h1 class="title"> شحن الرصيد</h1>
+
+      <!-- عروض الشحن -->
+      <div id="offersRow" class="offers-row">
+        <div class="offer-box" data-balance="150" data-cash="180">
+          <button class="offer-cancel" title="إلغاء العرض">&times;</button>
+          <span class="offer-label"></span>
+          <span style="font-weight:bold; font-size:1.05rem;">اشحن 150 صافي ب 170ج💸🔥</span>
+        </div>
+        <div class="offer-box" data-balance="300" data-cash="350">
+          <button class="offer-cancel" title="إلغاء العرض">&times;</button>
+          <span class="offer-label"></span>
+          <span style="font-weight:bold; font-size:1.05rem;">اشحن 300 صافي بـ 355ج 💸🔥</span>
+        </div>
+        <div class="offer-box" data-balance="500" data-cash="585">
+          <button class="offer-cancel" title="إلغاء العرض">&times;</button>
+          <span class="offer-label"></span>
+          <span style="font-weight:bold; font-size:1.05rem;">اشحن 500 صافي بـ 580ج 💸🔥</span>
+        </div>
+        <div class="offer-box" data-balance="1000" data-cash="1180">
+          <button class="offer-cancel" title="إلغاء العرض">&times;</button>
+          <span class="offer-label"></span>
+          <span style="font-weight:bold; font-size:1.05rem;">اشحن 1000 صافي بـ 1180ج 💸🔥</span>
+        </div>
+      </div>
+      <!-- نهاية العروض -->
+
       <!-- Form Container -->
       <div id="formContainer" class="form-container">
         <form id="rechargeForm" method="POST" action="/api/submit" enctype="multipart/form-data">
           <!-- Balance Selection -->
           <div class="form-group">
             <label for="balance">اختار كمية الرصيد</label>
-            <select id="balance" name="balance" required>
-              <option value="" disabled selected>-- اختار القيمة --</option>
-              <option value="10">10 جنيه</option>
-              <option value="20">20 جنيه</option>
-              <option value="30">30 جنيه</option>
-              <option value="40">40 جنيه</option>
-              <option value="50">50 جنيه</option>
-              <option value="60">60 جنيه</option>
-              <option value="70">70 جنيه</option>
-              <option value="80">80 جنيه</option>
-              <option value="90">90 جنيه</option>
-              <option value="100">100 جنيه</option>
-              <option value="200">200 جنيه</option>
-              <option value="300">300 جنيه</option>
-              <option value="400">400 جنيه</option>
-              <option value="500">500 جنيه</option>
-              <option value="1000">1000 جنيه</option>
-            </select>
+            <div class="balance-cash-row">
+              <input type="number" id="balanceInput" min="20" step="10" placeholder="أدخل قيمة الشحن" />
+              <span class="equal-sign" style="align-self: center; font-size: 1.5rem;">=</span>
+              <input type="text" id="cashAmount" readonly placeholder="المبلغ المطلوب" />
+            </div>
           </div>
           
-          <!-- Cash Amount Info (Hidden initially) -->
+          <!-- Info box, hidden by default -->
           <div id="balanceInfo" class="info-box hidden">
-            <p id="balanceInfoText">ابعت <span id="cashAmount">0</span> ج كاش علشان تشحن بـ <span id="rechargeAmount">0</span> ج رصيد</p>
+            ادفع <span id="cashAmountSpan"></span> ج كاش مقابل شحن <span id="rechargeAmount"></span> ج رصيد صافي.
+          </div>
+          <div id="minBalanceBox" class="info-box error hidden">
+            اقل قيمة للشحن هي 20ج صافي.
           </div>
           
           <!-- Phone Number -->
@@ -121,7 +137,7 @@
           
           <!-- InstaPay Instructions (Hidden initially) -->
           <div id="instaInstructions" class="payment-instructions info-box hidden">
-            <p class="instruction-text"> ابعت على اليوزر ده : mhmdnsar1</p>
+            <p class="instruction-text"> على اليوزر ده : mhmdnsar1</p>
             
             <div class="form-group">
               <label for="instaSender"> اكتب اليوزر اللي بعت منه بدون "instapay@"</label>
@@ -187,7 +203,7 @@
             </div>
           </div>
           
-          <a href="/"><button id="newRequestBtn" type="button" class="new-request-btn">طلب جديد</button></a>
+          <button id="newRequestBtn" type="button" class="new-request-btn">طلب جديد</button>
         </div>
       </div>
     </div>
