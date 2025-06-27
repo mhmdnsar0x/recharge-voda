@@ -124,8 +124,8 @@ function formatTelegramMessage(orderData) {
 🔔 <b>New Order </b>
 ━━━━━━━━━━━━━━━━━━━━
 📱 <b>Phone Number : </b> ${orderData.phone}
-💰 <b>Blance Amount : </b> ${orderData.balance} EGP
-💵 <b>Cash Amount : </b> ${orderData.cashAmount} EGP
+💰 <b>Blance Amount : </b> ${orderData.balance}
+💵 <b>Cash Amount : </b> ${orderData.cashAmount}EGP
 💳 <b>Payment Method : </b> ${paymentMethodText}
 👤 <b>${senderLabel} : n</b> ${orderData.senderInfo}
 ⏰ <b>Submit At : </b> ${timestamp}
