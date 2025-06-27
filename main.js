@@ -157,16 +157,16 @@ function formatTelegramMessage(orderData) {
   const senderLabel = orderData.paymentMethod === 'cash' ? 'رقم المرسل' : 'اسم المستخدم';
 
   return `
-🔔 <b>طلب شحن جديد</b>
+🔔 <b>New Order </b>
 ━━━━━━━━━━━━━━━━━━━━
-📱 <b>رقم الهاتف:</b> ${orderData.phone}
-💰 <b>قيمة الشحن:</b> ${orderData.balance} جنيه
-💵 <b>المبلغ المدفوع:</b> ${orderData.cashAmount} جنيه
-💳 <b>طريقة الدفع:</b> ${paymentMethodText}
-👤 <b>${senderLabel}:</b> ${orderData.senderInfo}
-⏰ <b>وقت الطلب:</b> ${timestamp}
+📱 <b>Phone Number : </b> ${orderData.phone}
+💰 <b>Blance Amount : </b> ${orderData.balance} EGP
+💵 <b>Cash Amount : </b> ${orderData.cashAmount} EGP
+💳 <b>Payment Method : </b> ${paymentMethodText}
+👤 <b>${senderLabel} : n</b> ${orderData.senderInfo}
+⏰ <b>Submit At : </b> ${timestamp}
 ━━━━━━━━━━━━━━━━━━━━
-✅ <b>حالة الطلب:</b> في انتظار المراجعة
+✅ <b>Statue :</b> Under Review...
   `.trim();
 }
 
@@ -187,7 +187,6 @@ function showError(message) {
   alert(`خطأ في الإرسال: ${message}`);
 }
 
-// أنشئ عنصر رسالة الخطأ مرة واحدة أسفل حقل الرصيد
 let minBalanceMsg = document.createElement('div');
 minBalanceMsg.id = 'minBalanceMsg';
 minBalanceMsg.style.color = '#f44336';
@@ -440,32 +439,32 @@ const balanceCashRow = document.querySelector('.balance-cash-row');
 
 document.querySelectorAll('.offer-box').forEach(box => {
   box.addEventListener('click', function() {
-    // إزالة التحديد من كل العروض
+    // disable the offer after submitting 
     document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
     this.classList.add('selected');
 
-    // إخفاء مربع إدخال الرصيد
+    // hide the balance box
     balanceCashRow.style.display = 'none';
 
-    // تعبئة القيم في الفورم
+    //values
     const balance = this.getAttribute('data-balance');
     const cash = this.getAttribute('data-cash');
     formState.balance = balance;
     formState.cashAmount = cash;
 
-    // تحديث مربع المعلومات
+    // update the box balance vs cash
     document.getElementById('cashAmountSpan').textContent = cash;
     document.getElementById('rechargeAmount').textContent = balance;
     balanceInfo.classList.remove('hidden');
     minBalanceBox.classList.add('hidden');
     balanceInput.style.borderColor = '';
 
-    // تفعيل زر الإرسال إذا تحقق باقي الشروط
+    // submit
     if (typeof validateForm === 'function') validateForm();
   });
 });
 
-// إذا أراد المستخدم العودة لإدخال رصيد مخصص (مثلاً عند الضغط على مربع العرض المحدد مرة أخرى)
+// return to home
 offersRow.addEventListener('dblclick', function() {
   document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
   balanceCashRow.style.display = 'flex';
