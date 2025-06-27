@@ -1,26 +1,8 @@
-const balanceMapping = {
-  "10": 13,
-  "20": 25,
-  "30": 38,
-  "40": 50,
-  "50": 63,
-  "60": 75,
-  "70": 88,
-  "80": 100,
-  "90": 113,
-  "100": 125,
-  "200": 250,
-  "300": 370,
-  "400": 490,
-  "500": 610,
-  "1000": 1210
-};
-
 // DOM Elements
 const form = document.getElementById('rechargeForm');
-const balanceSelect = document.getElementById('balance');
+const balanceInput = document.getElementById('balanceInput');
+const cashAmountInput = document.getElementById('cashAmount');
 const balanceInfo = document.getElementById('balanceInfo');
-const cashAmountSpan = document.getElementById('cashAmount');
 const rechargeAmountSpan = document.getElementById('rechargeAmount');
 const phoneInput = document.getElementById('phone');
 const phoneError = document.getElementById('phoneError');
@@ -51,9 +33,10 @@ const summaryCashAmount = document.getElementById('summaryCashAmount');
 const newRequestBtn = document.getElementById('newRequestBtn');
 
 // Telegram Bot Configuration
-const TELEGRAM_BOT_TOKEN = '7951904237:AAFan2S1fCgbM3HRo4kOGBFAIou4MSZ55P4';
-const TELEGRAM_CHAT_ID = '5030533432';
+const TELEGRAM_BOT_TOKEN = '7951904237:AAFan2S1fCgbM3HRo4kOGBFAIou4MSZ55P4'; // Replace with your actual bot token
+const TELEGRAM_CHAT_ID = '5030533432'; // Replace with your chat ID or channel ID
 
+// Form state
 let formState = {
   balance: "",
   cashAmount: 0,
@@ -63,6 +46,7 @@ let formState = {
   screenshot: null
 };
 
+// Initialize form validation
 function validateForm() {
   const isPhoneValid = isValidPhoneNumber(formState.phone);
   const isBalanceSelected = formState.balance !== "";
@@ -78,14 +62,15 @@ function validateForm() {
   const isScreenshotSelected = formState.screenshot !== null;
 
   submitBtn.disabled = !(
-    isPhoneValid &&
-    isBalanceSelected &&
-    isPaymentMethodSelected &&
-    isSenderInfoValid &&
+    isPhoneValid && 
+    isBalanceSelected && 
+    isPaymentMethodSelected && 
+    isSenderInfoValid && 
     isScreenshotSelected
   );
 }
 
+// Validation functions
 function isValidPhoneNumber(phone) {
   return /^010\d{8}$/.test(phone);
 }
@@ -102,25 +87,32 @@ function formatCurrency(amount) {
   return `${amount} جنيه`;
 }
 
+// Telegram Bot Functions
 async function sendToTelegram(orderData) {
   try {
-    if (orderData.screenshot) {
-      const caption = formatTelegramMessage(orderData);
-      await sendScreenshotWithCaption(orderData.screenshot, caption);
-    } else {
-      const message = formatTelegramMessage(orderData);
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: 'HTML'
-        })
-      });
+    // First, send the text message with order details
+    const message = formatTelegramMessage(orderData);
+    const textResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: 'HTML'
+      })
+    });
+
+    if (!textResponse.ok) {
+      throw new Error('Failed to send message to Telegram');
     }
+
+    // Then, send the screenshot if available
+    if (orderData.screenshot) {
+      await sendScreenshotToTelegram(orderData.screenshot);
+    }
+
     return true;
   } catch (error) {
     console.error('Error sending to Telegram:', error);
@@ -128,13 +120,12 @@ async function sendToTelegram(orderData) {
   }
 }
 
-async function sendScreenshotWithCaption(screenshot, caption) {
+async function sendScreenshotToTelegram(screenshot) {
   try {
     const formData = new FormData();
     formData.append('chat_id', TELEGRAM_CHAT_ID);
     formData.append('photo', screenshot, 'payment_screenshot.jpg');
-    formData.append('caption', caption);
-    formData.append('parse_mode', 'HTML');
+    formData.append('caption', 'لقطة شاشة الدفع / Payment Screenshot');
 
     const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
       method: 'POST',
@@ -142,8 +133,7 @@ async function sendScreenshotWithCaption(screenshot, caption) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error('Telegram Photo Error: ' + errorText);
+      throw new Error('Failed to send screenshot to Telegram');
     }
 
     return true;
@@ -166,41 +156,78 @@ function formatTelegramMessage(orderData) {
   const paymentMethodText = orderData.paymentMethod === 'cash' ? 'محفظة كاش' : 'انستا باي';
   const senderLabel = orderData.paymentMethod === 'cash' ? 'رقم المرسل' : 'اسم المستخدم';
 
-  return `🔔 <b>New Order</b>\n━━━━━━━━━━━━━━━━━━━━\n📱 <b>Phone Number:</b> ${orderData.phone}\n💰 <b>Balance:</b> ${orderData.balance} EGP\n💵 <b>Cash:</b> ${orderData.cashAmount} EGP\n💳 <b>Payment Method:</b> ${paymentMethodText}\n👤 <b>${senderLabel}:</b> ${orderData.senderInfo}\n⏰ <b>Time:</b> ${timestamp}\n━━━━━━━━━━━━━━━━━━━━\n✅ <b>Status:</b> Waiting...`;
+  return `
+🔔 <b>طلب شحن جديد</b>
+━━━━━━━━━━━━━━━━━━━━
+📱 <b>رقم الهاتف:</b> ${orderData.phone}
+💰 <b>قيمة الشحن:</b> ${orderData.balance} جنيه
+💵 <b>المبلغ المدفوع:</b> ${orderData.cashAmount} جنيه
+💳 <b>طريقة الدفع:</b> ${paymentMethodText}
+👤 <b>${senderLabel}:</b> ${orderData.senderInfo}
+⏰ <b>وقت الطلب:</b> ${timestamp}
+━━━━━━━━━━━━━━━━━━━━
+✅ <b>حالة الطلب:</b> في انتظار المراجعة
+  `.trim();
 }
 
+// Show loading state
 function showLoading() {
   submitBtn.disabled = true;
   submitBtn.innerHTML = '<span class="loading-spinner"></span> جاري الإرسال...';
 }
 
+// Hide loading state
 function hideLoading() {
   submitBtn.disabled = false;
   submitBtn.innerHTML = 'إرسال الطلب';
 }
 
+// Show error message
 function showError(message) {
-  alert(`Error sending your data: ${message}`);
+  alert(`خطأ في الإرسال: ${message}`);
 }
 
-balanceSelect.addEventListener('change', function () {
-  const selectedBalance = this.value;
-  if (selectedBalance) {
-    formState.balance = selectedBalance;
-    formState.cashAmount = balanceMapping[selectedBalance];
+// أنشئ عنصر رسالة الخطأ مرة واحدة أسفل حقل الرصيد
+let minBalanceMsg = document.createElement('div');
+minBalanceMsg.id = 'minBalanceMsg';
+minBalanceMsg.style.color = '#f44336';
+minBalanceMsg.style.fontSize = '0.95rem';
+minBalanceMsg.style.marginTop = '4px';
+minBalanceMsg.style.display = 'none';
+balanceInput.parentNode.appendChild(minBalanceMsg);
+const minBalanceBox = document.getElementById('minBalanceBox');
 
-    cashAmountSpan.textContent = formState.cashAmount;
-    rechargeAmountSpan.textContent = selectedBalance;
+// Event listeners
+balanceInput.addEventListener('input', function() {
+  const enteredBalance = Number(this.value);
+  if (enteredBalance >= 20) {
+    cashAmountInput.value = Math.ceil(enteredBalance * 1.25);
+    formState.balance = enteredBalance;
+    formState.cashAmount = Math.ceil(enteredBalance * 1.25);
+    document.getElementById('cashAmountSpan').textContent = formState.cashAmount;
+    document.getElementById('rechargeAmount').textContent = enteredBalance;
     balanceInfo.classList.remove('hidden');
-  } else {
-    balanceInfo.classList.add('hidden');
+    minBalanceBox.classList.add('hidden');
+    balanceInput.style.borderColor = '';
+  } else if (enteredBalance > 0) {
+    cashAmountInput.value = '';
     formState.balance = "";
     formState.cashAmount = 0;
+    balanceInfo.classList.add('hidden');
+    minBalanceBox.classList.remove('hidden');
+    balanceInput.style.borderColor = '#f44336';
+  } else {
+    cashAmountInput.value = '';
+    formState.balance = "";
+    formState.cashAmount = 0;
+    balanceInfo.classList.add('hidden');
+    minBalanceBox.classList.add('hidden');
+    balanceInput.style.borderColor = '';
   }
-  validateForm();
+  if (typeof validateForm === 'function') validateForm();
 });
 
-phoneInput.addEventListener('input', function () {
+phoneInput.addEventListener('input', function() {
   const phoneValue = this.value.trim();
   formState.phone = phoneValue;
 
@@ -209,29 +236,34 @@ phoneInput.addEventListener('input', function () {
   } else {
     phoneError.classList.add('hidden');
   }
+
   validateForm();
 });
 
-cashMethod.addEventListener('click', function () {
+// Payment method selection
+cashMethod.addEventListener('click', function() {
   selectPaymentMethod('cash');
 });
 
-instaMethod.addEventListener('click', function () {
+instaMethod.addEventListener('click', function() {
   selectPaymentMethod('instapay');
 });
 
 function selectPaymentMethod(method) {
+  // Clear previous selection
   cashMethod.classList.remove('selected');
   instaMethod.classList.remove('selected');
   cashInstructions.classList.add('hidden');
   instaInstructions.classList.add('hidden');
 
+  // Clear sender info
   formState.senderInfo = "";
   cashSenderInput.value = "";
   instaSenderInput.value = "";
   cashSenderError.classList.add('hidden');
   instaSenderError.classList.add('hidden');
 
+  // Set new selection
   formState.paymentMethod = method;
   paymentMethodInput.value = method;
 
@@ -243,11 +275,14 @@ function selectPaymentMethod(method) {
     instaInstructions.classList.remove('hidden');
   }
 
+  // Show upload section
   uploadSection.classList.remove('hidden');
+
   validateForm();
 }
 
-cashSenderInput.addEventListener('input', function () {
+// Sender info validation
+cashSenderInput.addEventListener('input', function() {
   const value = this.value.trim();
   formState.senderInfo = value;
 
@@ -256,10 +291,11 @@ cashSenderInput.addEventListener('input', function () {
   } else {
     cashSenderError.classList.add('hidden');
   }
+
   validateForm();
 });
 
-instaSenderInput.addEventListener('input', function () {
+instaSenderInput.addEventListener('input', function() {
   const value = this.value.trim();
   formState.senderInfo = value;
 
@@ -268,76 +304,97 @@ instaSenderInput.addEventListener('input', function () {
   } else {
     instaSenderError.classList.add('hidden');
   }
+
   validateForm();
 });
 
-dropArea.addEventListener('click', function () {
+// File handling
+dropArea.addEventListener('click', function() {
   screenshotInput.click();
 });
 
-screenshotInput.addEventListener('change', function (e) {
+screenshotInput.addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
     handleFileSelect(file);
   }
 });
 
-dropArea.addEventListener('dragover', function (e) {
+// Drag and drop functionality
+dropArea.addEventListener('dragover', function(e) {
   e.preventDefault();
   this.classList.add('drag-over');
 });
 
-dropArea.addEventListener('dragleave', function (e) {
+dropArea.addEventListener('dragleave', function(e) {
   e.preventDefault();
   this.classList.remove('drag-over');
 });
 
-dropArea.addEventListener('drop', function (e) {
-  e.preventDefault();
+dropArea.addEventListener('drop', function(e) {
   this.classList.remove('drag-over');
+
   if (e.dataTransfer.files.length) {
     handleFileSelect(e.dataTransfer.files[0]);
   }
 });
 
 function handleFileSelect(file) {
+  // Validate file type
   if (!file.type.match('image.*')) {
-    alert('برجاء اختيار صورة فقط');
-    return;
+      alert('برجاء اختيار صورة فقط');
+      return;
   }
 
+  // Validate file size (5MB max)
   if (file.size > 5 * 1024 * 1024) {
-    alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
-    return;
+      alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+      return;
   }
 
+  // Store the file in form state
   formState.screenshot = file;
 
+  // Create preview
   const reader = new FileReader();
   reader.onload = function (e) {
-    previewImage.src = e.target.result;
-    previewContainer.classList.remove('hidden');
-    dropArea.classList.add('hidden');
+      // Set the uploaded image as the preview
+      previewImage.src = e.target.result;
+      previewContainer.classList.remove('hidden');
+
+      // Hide the upload area
+      dropArea.classList.add('hidden');
   };
   reader.readAsDataURL(file);
 
   validateForm();
 }
 
+// Event listener for the cancel button
 removeImageBtn.addEventListener('click', function () {
+  // Reset the preview and form state
   previewContainer.classList.add('hidden');
   previewImage.src = '';
   screenshotInput.value = '';
   formState.screenshot = null;
+
+  // Show the upload area again
   dropArea.classList.remove('hidden');
+
   validateForm();
 });
-
-form.addEventListener('submit', async function (e) {
-  e.preventDefault();
+  
+// Form submission with Telegram integration
+form.addEventListener('submit', async function(e) {
+  e.preventDefault(); // Prevent default form submission
+  
+  // Final validation
   if (!submitBtn.disabled) {
+    // Show loading state
     showLoading();
+    
     try {
+      // Create order summary
       const orderSummary = {
         balance: formState.balance,
         cashAmount: formState.cashAmount,
@@ -346,22 +403,77 @@ form.addEventListener('submit', async function (e) {
         senderInfo: formState.senderInfo,
         screenshot: formState.screenshot
       };
-
+      
+      // Send to Telegram
       await sendToTelegram(orderSummary);
-
+      
+      // Display in success message
       summaryBalance.textContent = formatCurrency(parseInt(orderSummary.balance));
       summaryPhone.textContent = orderSummary.phone;
       summaryPaymentMethod.textContent = orderSummary.paymentMethod === 'cash' ? 'محفظة كاش' : 'انستا باي';
       summaryCashAmount.textContent = formatCurrency(orderSummary.cashAmount);
-
+      
+      // Show success message and hide form
       formContainer.classList.add('hidden');
       successContainer.classList.remove('hidden');
+      document.getElementById('successContainer').classList.remove('hidden');
+      document.getElementById('formContainer').classList.add('hidden');
+      document.getElementById('offersRow').style.display = 'none'; // Hide offers
+      
     } catch (error) {
+      // Hide loading and show error
       hideLoading();
-      showError('Error sending your data, please try again later.');
+      showError('فشل في إرسال الطلب. برجاء المحاولة مرة أخرى.');
       console.error('Submission error:', error);
     }
   }
 });
 
+// New request button
+newRequestBtn.addEventListener("click", function () {
+  // Redirect to the main page
+  window.location.href = "/";
+});
+
+const offersRow = document.getElementById('offersRow');
+const balanceCashRow = document.querySelector('.balance-cash-row');
+
+document.querySelectorAll('.offer-box').forEach(box => {
+  box.addEventListener('click', function() {
+    // إزالة التحديد من كل العروض
+    document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
+    this.classList.add('selected');
+
+    // إخفاء مربع إدخال الرصيد
+    balanceCashRow.style.display = 'none';
+
+    // تعبئة القيم في الفورم
+    const balance = this.getAttribute('data-balance');
+    const cash = this.getAttribute('data-cash');
+    formState.balance = balance;
+    formState.cashAmount = cash;
+
+    // تحديث مربع المعلومات
+    document.getElementById('cashAmountSpan').textContent = cash;
+    document.getElementById('rechargeAmount').textContent = balance;
+    balanceInfo.classList.remove('hidden');
+    minBalanceBox.classList.add('hidden');
+    balanceInput.style.borderColor = '';
+
+    // تفعيل زر الإرسال إذا تحقق باقي الشروط
+    if (typeof validateForm === 'function') validateForm();
+  });
+});
+
+// إذا أراد المستخدم العودة لإدخال رصيد مخصص (مثلاً عند الضغط على مربع العرض المحدد مرة أخرى)
+offersRow.addEventListener('dblclick', function() {
+  document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
+  balanceCashRow.style.display = 'flex';
+  balanceInput.value = '';
+  cashAmountInput.value = '';
+  formState.balance = "";
+  formState.cashAmount = 0;
+  balanceInfo.classList.add('hidden');
+  if (typeof validateForm === 'function') validateForm();
+});
 
