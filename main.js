@@ -187,6 +187,7 @@ function showError(message) {
   alert(`خطأ في الإرسال: ${message}`);
 }
 
+// error msg
 let minBalanceMsg = document.createElement('div');
 minBalanceMsg.id = 'minBalanceMsg';
 minBalanceMsg.style.color = '#f44336';
@@ -439,20 +440,20 @@ const balanceCashRow = document.querySelector('.balance-cash-row');
 
 document.querySelectorAll('.offer-box').forEach(box => {
   box.addEventListener('click', function() {
-    // disable the offer after submitting 
+    // delete selected offers
     document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
     this.classList.add('selected');
 
-    // hide the balance box
+    // hide the balan vs cash box
     balanceCashRow.style.display = 'none';
 
-    //values
+    // data
     const balance = this.getAttribute('data-balance');
     const cash = this.getAttribute('data-cash');
     formState.balance = balance;
     formState.cashAmount = cash;
 
-    // update the box balance vs cash
+    // info
     document.getElementById('cashAmountSpan').textContent = cash;
     document.getElementById('rechargeAmount').textContent = balance;
     balanceInfo.classList.remove('hidden');
@@ -464,7 +465,7 @@ document.querySelectorAll('.offer-box').forEach(box => {
   });
 });
 
-// return to home
+//return to home 
 offersRow.addEventListener('dblclick', function() {
   document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
   balanceCashRow.style.display = 'flex';
@@ -476,3 +477,18 @@ offersRow.addEventListener('dblclick', function() {
   if (typeof validateForm === 'function') validateForm();
 });
 
+document.querySelectorAll('.offer-box .offer-cancel').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation(); // Prevent triggering the offer-box click
+    const box = this.closest('.offer-box');
+    box.classList.remove('selected');
+    balanceCashRow.style.display = 'flex';
+    balanceInput.value = '';
+    cashAmountInput.value = '';
+    formState.balance = "";
+    formState.cashAmount = 0;
+    balanceInfo.classList.add('hidden');
+    minBalanceBox.classList.add('hidden');
+    if (typeof validateForm === 'function') validateForm();
+  });
+});
