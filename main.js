@@ -33,8 +33,8 @@ const summaryCashAmount = document.getElementById('summaryCashAmount');
 const newRequestBtn = document.getElementById('newRequestBtn');
 
 // Telegram Bot Configuration
-const TELEGRAM_BOT_TOKEN = '7951904237:AAFan2S1fCgbM3HRo4kOGBFAIou4MSZ55P4'; // Replace with your actual bot token
-const TELEGRAM_CHAT_ID = '5030533432'; // Replace with your chat ID or channel ID
+const TELEGRAM_BOT_TOKEN = '7951904237:AAFan2S1fCgbM3HRo4kOGBFAIou4MSZ55P4'; // 😢😢😢
+const TELEGRAM_CHAT_ID = '5030533432'; // 😢مشغلش دماغك الاستاضفة المجانية خلصت😂.
 
 // Form state
 let formState = {
