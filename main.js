@@ -32,9 +32,18 @@ const summaryPaymentMethod = document.getElementById('summaryPaymentMethod');
 const summaryCashAmount = document.getElementById('summaryCashAmount');
 const newRequestBtn = document.getElementById('newRequestBtn');
 
+// Trader code logic
+const showTraderBtn = document.getElementById('showTraderBtn');
+const traderRow = document.getElementById('traderRow');
+const traderCodeInput = document.getElementById('traderCodeInput');
+const applyTraderBtn = document.getElementById('applyTraderBtn');
+const closeTraderRow = document.getElementById('closeTraderRow');
+const traderError = document.getElementById('traderError');
+let traderApplied = false;
+
 // Telegram Bot Configuration
-const TELEGRAM_BOT_TOKEN = '7951904237:AAFan2S1fCgbM3HRo4kOGBFAIou4MSZ55P4'; // 😢😢😢
-const TELEGRAM_CHAT_ID = '5030533432'; // 😢مشغلش دماغك الاستاضفة المجانية خلصت😂.
+const TELEGRAM_BOT_TOKEN = '7951904237:AAFan2S1fCgbM3HRo4kOGBFAIou4MSZ55P4'; // 😢😢
+const TELEGRAM_CHAT_ID = '5030533432'; // 😢😢
 
 // Form state
 let formState = {
@@ -89,9 +98,6 @@ function formatCurrency(amount) {
 
 // Telegram Bot Functions
 async function sendToTelegram(orderData) {
-  // orderData.screenshot: File object (the image)
-  // formatTelegramMessage(orderData): returns the message string
-
   const formData = new FormData();
   formData.append('chat_id', TELEGRAM_CHAT_ID);
   formData.append('photo', orderData.screenshot, 'payment_screenshot.jpg');
@@ -124,11 +130,11 @@ function formatTelegramMessage(orderData) {
 🔔 <b>New Order </b>
 ━━━━━━━━━━━━━━━━━━━━
 📱 <b>Phone Number : </b> ${orderData.phone}
-💰 <b>Blance Amount : </b> ${orderData.balance}
---------------------
-💵 <b>Cash Amount : </b> ${orderData.cashAmount}EGP
+💰 <b>Blance Amount : </b> ${orderData.balance} EGP
+____________________
+💵 <b>Cash Amount : </b> ${orderData.cashAmount} EGP
 💳 <b>Payment Method : </b> ${paymentMethodText}
-👤 <b>${senderLabel} : </b> ${orderData.senderInfo}
+👤 <b>${senderLabel} : n</b> ${orderData.senderInfo}
 ⏰ <b>Submit At : </b> ${timestamp}
 ━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Statue :</b> Under Review...
@@ -383,7 +389,6 @@ form.addEventListener('submit', async function(e) {
       successContainer.classList.remove('hidden');
       document.getElementById('successContainer').classList.remove('hidden');
       document.getElementById('formContainer').classList.add('hidden');
-      document.getElementById('offersRow').style.display = 'none'; // Hide offers
       
     } catch (error) {
       // Hide loading and show error
@@ -400,61 +405,161 @@ newRequestBtn.addEventListener("click", function () {
   window.location.href = "/";
 });
 
-const offersRow = document.getElementById('offersRow');
-const balanceCashRow = document.querySelector('.balance-cash-row');
+// Trader code logic
+showTraderBtn.addEventListener('click', function() {
+  showTraderBtn.classList.add('hide');
+  traderRow.classList.add('active');
+  traderCodeInput.value = '';
+});
 
-document.querySelectorAll('.offer-box').forEach(box => {
-  box.addEventListener('click', function() {
-    // delete selected offers
-    document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
-    this.classList.add('selected');
+closeTraderRow.addEventListener('click', function() {
+  traderRow.classList.remove('active');
+  setTimeout(() => {
+    showTraderBtn.classList.remove('hide');
+    showTraderBtn.style.display = ''; // إظهار زر التجار من جديد
+  }, 400);
+  traderError.textContent = '';
+  traderCodeInput.value = '';
+  traderLogBox.className = '';
+  applyTraderBtn.style.display = ''; 
+  // Reset price 
+  const enteredBalance = Number(balanceInput.value);
+  if (enteredBalance >= 20) {
+    const cashValue = Math.ceil(enteredBalance * 1.25);
+    cashAmountInput.value = `${cashValue}`;
+    formState.cashAmount = cashValue;
+    document.getElementById('cashAmountSpan').textContent = cashValue;
+  }
+});
 
-    // hide the balan vs cash box
-    balanceCashRow.style.display = 'none';
+const elements = {
+  form: document.getElementById('rechargeForm'),
+  balanceInput: document.getElementById('balanceInput'),
+  cashAmountInput: document.getElementById('cashAmount'),
+  balanceInfo: document.getElementById('balanceInfo'),
+  rechargeAmountSpan: document.getElementById('rechargeAmount'),
+  phoneInput: document.getElementById('phone'),
+  phoneError: document.getElementById('phoneError'),
+  paymentMethodInput: document.getElementById('paymentMethod'),
+  cashMethod: document.getElementById('cashMethod'),
+  instaMethod: document.getElementById('instaMethod'),
+  cashInstructions: document.getElementById('cashInstructions'),
+  instaInstructions: document.getElementById('instaInstructions'),
+  cashSenderInput: document.getElementById('cashSender'),
+  cashSenderError: document.getElementById('cashSenderError'),
+  instaSenderInput: document.getElementById('instaSender'),
+  instaSenderError: document.getElementById('instaSenderError'),
+  uploadSection: document.getElementById('uploadSection'),
+  dropArea: document.getElementById('dropArea'),
+  screenshotInput: document.getElementById('screenshot'),
+  previewContainer: document.getElementById('previewContainer'),
+  previewImage: document.getElementById('previewImage'),
+  removeImageBtn: document.getElementById('removeImage'),
+  submitBtn: document.getElementById('submitBtn'),
+  formContainer: document.getElementById('formContainer'),
+  successContainer: document.getElementById('successContainer'),
+  summaryBalance: document.getElementById('summaryBalance'),
+  summaryPhone: document.getElementById('summaryPhone'),
+  summaryPaymentMethod: document.getElementById('summaryPaymentMethod'),
+  summaryCashAmount: document.getElementById('summaryCashAmount'),
+  newRequestBtn: document.getElementById('newRequestBtn'),
+  showTraderBtn: document.getElementById('showTraderBtn'),
+  traderRow: document.getElementById('traderRow'),
+  traderCodeInput: document.getElementById('traderCodeInput'),
+  applyTraderBtn: document.getElementById('applyTraderBtn'),
+  closeTraderRow: document.getElementById('closeTraderRow'),
+  traderError: document.getElementById('traderError'),
+  traderLogBox: document.getElementById('traderLogBox')
+};
 
-    // data
-    const balance = this.getAttribute('data-balance');
-    const cash = this.getAttribute('data-cash');
-    formState.balance = balance;
-    formState.cashAmount = cash;
+const TRADER_CODE_HASH = '8943e8c4b27790186b52e1f4c58a7f5264f158b5db95cdb5e637af9e53dae32f'; 
+if (elements.applyTraderBtn) {
+  elements.applyTraderBtn.addEventListener('click', async () => {
+    if (
+      !elements.traderCodeInput ||
+      !elements.traderError ||
+      !elements.balanceInfo ||
+      !elements.showTraderBtn ||
+      !elements.balanceInput
+    ) {
+      elements.traderLogBox.textContent = 'هناك خطأ في عناصر الصفحة المطلوبة';
+      elements.traderLogBox.className = 'visible error';
+      return;
+    }
 
-    // info
-    document.getElementById('cashAmountSpan').textContent = cash;
-    document.getElementById('rechargeAmount').textContent = balance;
-    balanceInfo.classList.remove('hidden');
-    minBalanceBox.classList.add('hidden');
-    balanceInput.style.borderColor = '';
+    const code = elements.traderCodeInput.value.trim().toUpperCase();
+    const balance = Number(elements.balanceInput.value) || 0;
+    elements.applyTraderBtn.disabled = true;
 
-    // submit
-    if (typeof validateForm === 'function') validateForm();
+    // Already applied
+    if (formState.isTrader) {
+      elements.traderLogBox.textContent = 'تم تطبيق الكود بالفعل';
+      elements.traderLogBox.className = 'visible error';
+      elements.traderError.textContent = 'تم تطبيق الكود بالفعل';
+      elements.traderError.style.color = '#f44336';
+      elements.applyTraderBtn.disabled = false;
+      return;
+    }
+
+    // No balance
+    if (!balance) {
+      elements.traderLogBox.textContent = 'ادخل كمية الرصيد أولاً';
+      elements.traderLogBox.className = 'visible error';
+      elements.traderError.textContent = 'ادخل كمية الرصيد أولاً';
+      elements.traderError.style.color = '#f44336';
+      elements.applyTraderBtn.disabled = false;
+      return;
+    }
+
+    // Balance too low
+    if (balance < 20) {
+      elements.traderLogBox.textContent = 'كمية الرصيد يجب أن تكون 20 جنيه أو أكثر';
+      elements.traderLogBox.className = 'visible error';
+      elements.traderError.textContent = 'كمية الرصيد يجب أن تكون 20 جنيه أو أكثر';
+      elements.traderError.style.color = '#f44336';
+      elements.applyTraderBtn.disabled = false;
+      return;
+    }
+
+    // hash function
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+    // hash compare
+    const codeHash = await sha256(code);
+    if (codeHash === TRADER_CODE_HASH) {
+      // احسب السعر الجديد
+      const newCashValue = Math.ceil(balance * 1.2);
+      elements.cashAmountInput.value = newCashValue;
+      formState.cashAmount = newCashValue;
+      document.getElementById('cashAmountSpan').textContent = newCashValue;
+
+      elements.traderLogBox.innerHTML =
+        '<span style="font-size:1.1em;vertical-align:middle;">&#10004;</span> تم تطبيق الكود بنجاح!';
+      elements.traderLogBox.className = 'visible success';
+      elements.applyTraderBtn.style.display = 'none'; 
+      elements.showTraderBtn.style.display = 'none';  
+      formState.isTrader = true;
+      elements.traderError.textContent = 'تم تطبيق الكود بنجاح!';
+      elements.traderError.style.color = '#4CAF50';
+      elements.traderCodeInput.value = '';
+      elements.balanceInfo.classList.add('sheen-anim', 'zoom-anim');
+      setTimeout(() => {
+        elements.balanceInfo.classList.remove('sheen-anim', 'zoom-anim');
+        elements.traderRow.classList.remove('active');
+        elements.applyTraderBtn.disabled = false;
+      }, 1000);
+      return;
+    }
+
+    // INVALID CODE
+    elements.traderLogBox.textContent = 'الكود غير صحيح. إذا كنت تاجر، تواصل معنا للحصول على الكود';
+    elements.traderLogBox.className = 'visible error';
+    elements.traderError.textContent = 'الكود غير صحيح. إذا كنت تاجر، تواصل معنا للحصول على الكود';
+    elements.traderError.style.color = '#f44336';
+    elements.applyTraderBtn.style.display = ''; // إظهار زر تطبيق مرة أخرى
+    elements.showTraderBtn.style.display = 'none';  
+    elements.applyTraderBtn.disabled = false;
   });
-});
-
-//return to home 
-offersRow.addEventListener('dblclick', function() {
-  document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
-  balanceCashRow.style.display = 'flex';
-  balanceInput.value = '';
-  cashAmountInput.value = '';
-  formState.balance = "";
-  formState.cashAmount = 0;
-  balanceInfo.classList.add('hidden');
-  if (typeof validateForm === 'function') validateForm();
-});
-
-document.querySelectorAll('.offer-box .offer-cancel').forEach(btn => {
-  btn.addEventListener('click', function(e) {
-    e.stopPropagation(); // Prevent triggering the offer-box click
-    const box = this.closest('.offer-box');
-    box.classList.remove('selected');
-    balanceCashRow.style.display = 'flex';
-    balanceInput.value = '';
-    cashAmountInput.value = '';
-    formState.balance = "";
-    formState.cashAmount = 0;
-    balanceInfo.classList.add('hidden');
-    minBalanceBox.classList.add('hidden');
-    if (typeof validateForm === 'function') validateForm();
-  });
-});
-
+}
