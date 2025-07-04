@@ -39,48 +39,39 @@
         <img src="assets/voda.png" class="title"  alt="Logo" style="max-width: 150px; margin-top:1.5rem">
       </div>
       <h1 class="title"> شحن الرصيد</h1>
-
-      <!-- عروض الشحن -->
-      <div id="offersRow" class="offers-row">
-        <div class="offer-box" data-balance="150" data-cash="180">
-          <button class="offer-cancel" title="إلغاء العرض">&times;</button>
-          <span class="offer-label"></span>
-          <span style="font-weight:bold; font-size:1.05rem;">اشحن 150 صافي بـ 180ج💸🔥</span>
-        </div>
-        <div class="offer-box" data-balance="300" data-cash="350">
-          <button class="offer-cancel" title="إلغاء العرض">&times;</button>
-          <span class="offer-label"></span>
-          <span style="font-weight:bold; font-size:1.05rem;">اشحن 300 صافي بـ 350ج 💸🔥</span>
-        </div>
-        <div class="offer-box" data-balance="500" data-cash="585">
-          <button class="offer-cancel" title="إلغاء العرض">&times;</button>
-          <span class="offer-label"></span>
-          <span style="font-weight:bold; font-size:1.05rem;">اشحن 500 صافي بـ 585ج 💸🔥</span>
-        </div>
-        <div class="offer-box" data-balance="1000" data-cash="1180">
-          <button class="offer-cancel" title="إلغاء العرض">&times;</button>
-          <span class="offer-label"></span>
-          <span style="font-weight:bold; font-size:1.05rem;">اشحن 1000 صافي بـ 1180ج 💸🔥</span>
-        </div>
-      </div>
-      <!-- نهاية العروض -->
-
       <!-- Form Container -->
       <div id="formContainer" class="form-container">
         <form id="rechargeForm" method="POST" action="/api/submit" enctype="multipart/form-data">
           <!-- Balance Selection -->
           <div class="form-group">
-            <label for="balance">اختار كمية الرصيد</label>
-            <div class="balance-cash-row">
-              <input type="number" id="balanceInput" min="20" step="10" placeholder="أدخل قيمة الشحن" />
-              <span class="equal-sign" style="align-self: center; font-size: 1.5rem;">=</span>
-              <input type="text" id="cashAmount" readonly placeholder="المبلغ المطلوب" />
+            <label for="balanceInput">اختار كمية الرصيد</label>
+            <div class="balance-cash-anim" id="balanceCashAnim">
+              <div class="balance-cash-row">
+                <input type="number" id="balanceInput" min="20" step="10" placeholder="أدخل قيمة الشحن" />
+                <span class="equal-sign" style="align-self: center; font-size: 1.5rem;">=</span>
+                <input type="text" id="cashAmount" readonly placeholder="المبلغ المطلوب" />
+              </div>
             </div>
           </div>
+
+
+          <!-- For Traders Button -->
+          <button type="button" id="showTraderBtn" class="trader-btn">For Traders</button>
+
+          <!-- Trader code input -->
+          <div id="traderRow" class="trader-row">
+            <input id="traderCodeInput" type="text" placeholder="Trader code">
+            <button type="button" id="applyTraderBtn" class="apply-btn">Apply</button>
+            <button type="button" id="closeTraderRow" class="close-trader-row" title="Cancel">&times;</button>
+            <div id="traderError" class="error-message hidden"></div>
+            </div> 
+            <!-- box to show statue for trader code --> 
+            <div id="traderLogBox"></div>
           
-          <!-- Info box, hidden by default -->
+          <!-- balance vs cash info-box -->
           <div id="balanceInfo" class="info-box hidden">
             ادفع <span id="cashAmountSpan"></span> ج كاش مقابل شحن <span id="rechargeAmount"></span> ج رصيد صافي.
+            
           </div>
           <div id="minBalanceBox" class="info-box error hidden">
             اقل قيمة للشحن هي 20ج صافي.
@@ -213,7 +204,6 @@
     <img src="assets/whatsapp.png" alt="WhatsApp Support" />
     <span class="support-text">الدعم</span>
   </a>
-
   <script src="main.js"></script>
 </body>
 </html>
