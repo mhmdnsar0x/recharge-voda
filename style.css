@@ -336,19 +336,17 @@
   .phone-icon {
     position: absolute;
     top: 50%;
-    left: 
-    transform: translateY(-50%);
+    transform : translateY(-50%);
     color: var(--text-light);
     pointer-events: none;
   }
   
   /* Error message */
   .error-message {
-    color: #ff0000; /* لون أحمر واضح */
+    color: #ff0000; 
     font-size: 0.875rem;
     margin-top: 0.25rem;
-    background-color: rgba(255, 255, 255, 0.8); /* خلفية شفافة */
-    padding: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 5px;
     text-align: center;
   }
@@ -711,138 +709,197 @@
   font-weight: bold;
 }
 
-/* صف العروض */
-.offers-row {
-  display: flex;
-  flex-direction: row;
-  gap: 1.2rem;
-  justify-content: center;
-  align-items: stretch;
-  flex-wrap: wrap;
-  margin: 1.5rem 0 1rem 0;
+/* Remove offers section styles */
+.offers-row,
+.offer-box,
+.offer-box.selected,
+.offer-box:hover,
+.offer-box input,
+.offer-box.selected input,
+.offer-box .equal-sign,
+.offer-box.selected .equal-sign,
+.offer-currency,
+.offer-box.selected .offer-currency,
+.offer-label,
+.offer-label::before,
+.offer-cancel,
+.offer-box.selected .offer-cancel,
+.offer-cancel:hover {
+  display: none !important;
+}
+@media (max-width: 600px) {
+  .offers-row,
+  .offer-box {
+    display: none !important;
+  }
 }
 
-/* صندوق العرض */
-.offer-box {
-  position: relative;
+.trader-btn {
+  background: #6cce71;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 0.4rem;
+  margin-top: 0.2rem;
+  transition: background 0.2s, opacity 0.3s;
+  box-shadow: 0 2px 8px #43a04722;
+  display: block;
+  width: 100%;
+}
+.trader-btn.hide {
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  transition: opacity 0.3s, height 0.3s, margin 0.3s, padding 0.3s;
+}
+
+.trader-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.4s, max-height 0.4s;
+}
+.trader-row.active {
+  opacity: 1;
+  max-height: 200px; /* was 60px */
+  pointer-events: auto;
+}
+.close-trader-row {
+  background:  #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  font-size: 1.4rem;
+  font-weight: bold;
+  cursor: pointer;
+  align-self: center;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fff, #ffe5e5);
-  border: 2px solid #f44336;
-  border-radius: 18px;
-  padding: 1.3rem 1.7rem;
-  min-width: 170px;
-  box-shadow: 0 6px 18px rgba(244, 67, 54, 0.2);
-  cursor: pointer;
-  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
-  overflow: visible;
+  margin-left: 0.3rem;
+  box-shadow: 0 2px 8px #0001;
+}
+.close-trader-row:hover {
+  background: #e0e0e0;
+  color: #e53935;
+  box-shadow: 0 4px 16px #e5393533;
+  transform: scale(1.08);
 }
 
-.offer-box:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 28px rgba(244, 67, 54, 0.3);
+.balance-cash-anim {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.balance-cash-row.zoom {
+  animation: zoomPop 0.5s;
+}
+@keyframes zoomPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  60% { transform: scale(0.95); }
+  100% { transform: scale(1); }
 }
 
-.offer-box.selected {
-  border-color: #43a047 !important; /* أخضر */
-  background: linear-gradient(135deg, #f3fef6, #e8f5e9);
-  box-shadow: 0 6px 24px #43a04722;
+
+#balanceInfo {
+  position: relative;
+  overflow: hidden;
 }
 
-.offer-box input {
-  width: 54px;
-  text-align: center;
-  border: none;
-  background: transparent;
-  font-weight: bold;
-  font-size: 1.18rem;
-  pointer-events: none;
-  color: #f44336;
-}
-
-.offer-box.selected input {
-  color: #388e3c;
-}
-
-.offer-box .equal-sign {
-  margin: 0 0.7rem;
-  font-size: 1.35rem;
-  color: #f44336;
-}
-
-.offer-box.selected .equal-sign {
-  color: #43a047;
-}
-
-.offer-currency {
-  margin-right: 0.3rem;
-  color: #f44336;
-  font-weight: bold;
-}
-
-.offer-box.selected .offer-currency {
-  color: #43a047;
-}
-
-/* العرض المائل */
-.offer-label {
+/* Sheen pseudo-element */
+#balanceInfo.sheen-anim::after {
+  content: "";
   position: absolute;
-  top: 8px;
-  left: -22px;
-  width: 70px;
-  text-align: center;
-  background: #f44336;
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: bold;
-  padding: 2px 0;
-  transform: rotate(-32deg);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.13);
+  top: 0; left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.7) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  transform: skewX(-20deg);
+  animation: sheenOnDiv 1s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
   z-index: 10;
-  letter-spacing: 1.5px;
-  border-radius: 4px;
-  pointer-events: none;
-}
-.offer-label::before {
-  content: "OFFER";
 }
 
-.offer-cancel {
-  display: none;
-  position: absolute;
-  top: -14px;
-  right: -14px;
-  background: #fff;
-  color: #f44336;
-  border: 2px solid #f44336;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-size: 1.3rem;
-  font-weight: bold;
+@keyframes sheenOnDiv {
+  100% {
+    left: 120%;
+  }
+}
+
+#balanceInfo.zoom-anim {
+  animation: zoomPopInfo 0.5s cubic-bezier(.4,0,.2,1);
+}
+@keyframes zoomPopInfo {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.13); }
+  60% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+.apply-btn {
+  background: linear-gradient(90deg, #43a047 60%, #388e3c 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.3rem;
+  font-size: 1.08rem;
+  font-weight: 600;
   cursor: pointer;
-  z-index: 2;
-  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px #43a04722;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+.apply-btn:active {
+  transform: scale(0.97);
 }
 
-.offer-box.selected .offer-cancel {
+#traderLogBox {
+  display: none; 
+  border: 1px solid #ddd;
+  font-size: 0.85rem;
+  margin: 6px auto 5px auto; 
+  min-height: 22px;
+  max-width: 220px;
+  color: #ff0000;
+  font-size: 0.875rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 5px;
+  text-align: center;
+}
+#traderLogBox.visible {
   display: block;
 }
-
-.offer-cancel:hover {
-  background: #f44336;
-  color: #fff;
-}
-
-@media (max-width: 600px) {
-  .offers-row {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-  }
-  .offer-box {
-    min-width: 90%;
-    justify-content: center;
-  }
+#traderLogBox.success {
+    background-color: #e2edee;
+  color: #000;
+  border: 1px solid #28a745;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 8px 0;
+  text-align: center;
+  margin-top: 8px;
+  font-size: 1.05em;
 }
