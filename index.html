@@ -47,8 +47,7 @@
             <label for="balanceInput">اختار كمية الرصيد</label>
             <div class="balance-cash-anim" id="balanceCashAnim">
               <div class="balance-cash-row">
-                <input type="number" id="balanceInput" min="20" step="10" placeholder="أدخل قيمة الشحن" />
-                <span class="equal-sign" style="align-self: center; font-size: 1.5rem;">=</span>
+<input type="number" id="balanceInput" min="20" step="any" placeholder="أدخل قيمة الشحن" />                <span class="equal-sign" style="align-self: center; font-size: 1.5rem;">=</span>
                 <input type="text" id="cashAmount" readonly placeholder="المبلغ المطلوب" />
               </div>
             </div>
@@ -173,9 +172,11 @@
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
             <polyline points="22 4 12 14.01 9 11.01" />
           </svg>
-          <h2 class="success-title">تم تقديم الطلب بنجاح</h2>
-          <p class="success-subtitle">سيتم معالجة طلبك قريباً</p>
-          
+          <h2 class="success-title">تم تقديم الطلب بنجاح<br> <div>
+            <b>Order ID:</b> <b id="summaryOrderId"></b>
+          </div>
+          </h2>
+         
           <div class="order-details">
             <h3 class="details-title">تفاصيل الطلب:</h3>
             <ul class="details-list">
@@ -193,6 +194,8 @@
               برجاء الانتظار...
             </div>
           </div>
+          <p class="success-subtitle">سيتم معالجة طلبك قريباً</p>
+          
           
           <button id="newRequestBtn" type="button" class="new-request-btn">طلب جديد</button>
         </div>
