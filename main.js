@@ -114,7 +114,7 @@ async function sendToTelegram(orderData) {
 }
 
 function formatTelegramMessage(orderData) {
-  const timestamp = new Date().toLocaleString('ar-EG', {
+  const timestamp = new Date().toLocaleString('en-US', {
     timeZone: 'Africa/Cairo',
     year: 'numeric',
     month: '2-digit',
@@ -125,20 +125,20 @@ function formatTelegramMessage(orderData) {
 
   const paymentMethodText = orderData.paymentMethod === 'cash' ? 'Cash Wallet ' : 'InstaPay';
   const senderLabel = orderData.paymentMethod === 'cash' ? 'Cash Number ' : 'Insta User ';
+return `
+🔔 <b>New Order</b>
+<b>Order ID:</b> <code>${orderData.orderId}</code>
+━━━━━━━━━━━━━━━━━━━━
+📱 <b>Phone Number:</b> ${orderData.phone}
+💰 <b>Blance Amount:</b> ${orderData.balance} EGP
 
-  return `
-🔔 <b>New Order </b>
+💵 <b>Cash Amount:</b> ${orderData.cashAmount} EGP
+💳 <b>Payment Method:</b> ${paymentMethodText}
+👤 <b>${senderLabel}:</b> ${orderData.senderInfo}
+⏰ <b>Submit At:</b> ${timestamp}
 ━━━━━━━━━━━━━━━━━━━━
-📱 <b>Phone Number : </b> ${orderData.phone}
-💰 <b>Blance Amount : </b> ${orderData.balance} EGP
-____________________
-💵 <b>Cash Amount : </b> ${orderData.cashAmount} EGP
-💳 <b>Payment Method : </b> ${paymentMethodText}
-👤 <b>${senderLabel} : n</b> ${orderData.senderInfo}
-⏰ <b>Submit At : </b> ${timestamp}
-━━━━━━━━━━━━━━━━━━━━
-✅ <b>Statue :</b> Under Review...
-  `.trim();
+✅ <b>Status:</b> Under Review...
+`.trim();
 }
 
 // Show loading state
@@ -357,16 +357,18 @@ removeImageBtn.addEventListener('click', function () {
   
 // Form submission with Telegram integration
 form.addEventListener('submit', async function(e) {
-  e.preventDefault(); // Prevent default form submission
-  
-  // Final validation
+  e.preventDefault();
+
   if (!submitBtn.disabled) {
-    // Show loading state
     showLoading();
-    
+
     try {
-      // Create order summary
+      // توليد Order ID
+      const orderId = generateOrderId(formState.phone);
+
+      // إنشاء ملخص الطلب مع Order ID
       const orderSummary = {
+        orderId, // أضف رقم الطلب هنا
         balance: formState.balance,
         cashAmount: formState.cashAmount,
         phone: formState.phone,
@@ -374,24 +376,25 @@ form.addEventListener('submit', async function(e) {
         senderInfo: formState.senderInfo,
         screenshot: formState.screenshot
       };
-      
-      // Send to Telegram
+
+      // إرسال إلى تليجرام
       await sendToTelegram(orderSummary);
-      
-      // Display in success message
+
+      // عرض ملخص الطلب بعد الإرسال
       summaryBalance.textContent = formatCurrency(parseInt(orderSummary.balance));
       summaryPhone.textContent = orderSummary.phone;
       summaryPaymentMethod.textContent = orderSummary.paymentMethod === 'cash' ? 'محفظة كاش' : 'انستا باي';
       summaryCashAmount.textContent = formatCurrency(orderSummary.cashAmount);
-      
-      // Show success message and hide form
+
+      // أضف رقم الطلب للملخص
+      document.getElementById('summaryOrderId').textContent = orderSummary.orderId;
+
       formContainer.classList.add('hidden');
       successContainer.classList.remove('hidden');
       document.getElementById('successContainer').classList.remove('hidden');
       document.getElementById('formContainer').classList.add('hidden');
-      
+
     } catch (error) {
-      // Hide loading and show error
       hideLoading();
       showError('فشل في إرسال الطلب. برجاء المحاولة مرة أخرى.');
       console.error('Submission error:', error);
@@ -562,4 +565,13 @@ if (elements.applyTraderBtn) {
     elements.showTraderBtn.style.display = 'none';  
     elements.applyTraderBtn.disabled = false;
   });
+}
+
+// Order ID generation
+function generateOrderId(phone) {
+  // 4 حروف عشوائية + آخر 4 أرقام من الهاتف + رقمين عشوائيين
+  const letters = "0XMN"
+  const phonePart = phone ? phone.slice(-4) : Math.floor(1000 + Math.random() * 9000);
+  const digits = Math.floor(10 + Math.random() * 90);
+  return `${letters}${phonePart}${digits}`;
 }
